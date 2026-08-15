@@ -1,11 +1,11 @@
 import { useState } from "react";
-import api from "../utils/api";
 import { User, Mail, Lock, Eye, EyeOff, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
 
 const SignupPage = () => {
+  const { signup, isSigningUp } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -14,15 +14,7 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      await api.post("/auth/signup", form);
-      setForm({ fullName: "", email: "", password: "" });
-    } catch (error) {
-      console.log("error", error);
-    } finally {
-      setIsLoading(false);
-    }
+    signup(form);
   };
 
   return (
@@ -118,9 +110,9 @@ const SignupPage = () => {
             <button
               type="submit"
               className="btn btn-primary w-full shadow-md hover:shadow-xl transition-all duration-300 mt-2"
-              disabled={isLoading}
+              disabled={isSigningUp}
             >
-              {isLoading ? (
+              {isSigningUp ? (
                 <span className="loading loading-spinner"></span>
               ) : (
                 "Create Account"
