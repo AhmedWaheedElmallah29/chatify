@@ -44,7 +44,7 @@ export const signup = async (req, res) => {
       newUser.email,
       newUser.fullName,
       process.env.CLIENT_URL,
-    ).catch((error) => console.error("Failed to send welcome email:", error));
+    ).catch((error) => console.error("Unhandled fallback error:", error));
 
     return res.status(201).json({
       _id: newUser._id,
