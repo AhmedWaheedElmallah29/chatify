@@ -1,10 +1,30 @@
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import { useChatStore } from "../store/useChatStore";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Fragment } from "react";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import { useAuthStore } from "../store/useAuthStore";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
+
+const formatMessageDate = (dateString) => {
+  const date = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) {
+    return "Today";
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return "Yesterday";
+  } else {
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+    });
+  }
+};
+
 
 const ChatContainer = () => {
   const { selectedUser, messages, getMessagesByUserId, isMessagedLoading } =
@@ -36,13 +56,32 @@ const ChatContainer = () => {
           <div className="flex flex-col gap-4">
             {messages.map((msg, index) => {
               const isMine = msg.senderId === authUser._id;
+              
+              let showDateDivider = false;
+              if (index === 0) {
+                showDateDivider = true;
+              } else {
+                const prevDate = new Date(messages[index - 1].createdAt).toDateString();
+                const currDate = new Date(msg.createdAt).toDateString();
+                if (prevDate !== currDate) {
+                  showDateDivider = true;
+                }
+              }
+
               return (
-                <div
-                  key={msg._id || index}
-                  className={`flex gap-3 w-full ${
-                    isMine ? "justify-end" : "justify-start"
-                  }`}
-                >
+                <Fragment key={msg._id || index}>
+                  {showDateDivider && (
+                    <div className="flex justify-center my-2">
+                      <span className="bg-[#1e2638] text-slate-400 text-[11px] font-medium px-3 py-1 rounded-full border border-slate-700/50 shadow-sm">
+                        {formatMessageDate(msg.createdAt)}
+                      </span>
+                    </div>
+                  )}
+                  <div
+                    className={`flex gap-3 w-full ${
+                      isMine ? "justify-end" : "justify-start"
+                    }`}
+                  >
                   {!isMine && (
                     <div className="w-8 h-8 rounded-full bg-slate-600 flex-shrink-0 mt-auto overflow-hidden border border-slate-700/50">
                       <img
@@ -80,23 +119,24 @@ const ChatContainer = () => {
                       )}
 
                       <span
-                        className={`text-[10px] font-medium mt-1 inline-block self-end ${
-                          isMine ? "text-teal-100/80" : "text-slate-400"
+                        className={`text-[10px] font-medium mt-1 text-right ${
+                          isMine ? "text-teal-100/70" : "text-slate-400/80"
                         }`}
                       >
                         {msg.createdAt
-                          ? new Date(msg.createdAt).toLocaleDateString(
-                              undefined,
+                          ? new Date(msg.createdAt).toLocaleTimeString(
+                              [],
                               {
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              },
+                              }
                             )
                           : ""}
                       </span>
                     </div>
                   </div>
                 </div>
+                </Fragment>
               );
             })}
           </div>
