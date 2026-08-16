@@ -20,11 +20,19 @@ const GuestRoute = () => {
 };
 
 const App = () => {
-  const { checkAuth, isCheckingAuth } = useAuthStore();
+  const { checkAuth, isCheckingAuth, authUser, connectSocket, disconnectSocket } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    if (authUser) {
+      connectSocket();
+    } else {
+      disconnectSocket();
+    }
+  }, [authUser, connectSocket, disconnectSocket]);
 
   if (isCheckingAuth) return <PageLoader />;
 

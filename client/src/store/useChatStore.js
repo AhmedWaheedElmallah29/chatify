@@ -4,13 +4,13 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
 
 export const useChatStore = create((set, get) => ({
-  allContacts: [],
   chats: [],
   messages: [],
   activeTab: "chats",
   selectedUser: null,
   isUsersLoading: false,
   isMessagedLoading: false,
+  searchedUser: null,
   isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
 
   toggleSound: () => {
@@ -22,15 +22,17 @@ export const useChatStore = create((set, get) => ({
 
   setSelectedUser: (selectedUser) => set({ selectedUser }),
 
-  getAllContacts: async () => {
-    set({ isUsersLoading: true });
+  setSearchedUser: (user) => set({ searchedUser: user }),
 
+  getUser: async (email) => {
+    set({ isUsersLoading: true, searchedUser: null });
     try {
-      const res = await api.get("/message/contacts");
-      set({ allContacts: res.data });
+      const res = await api.get(`/message/contacts/${email}`);
+      set({ searchedUser: res.data });
     } catch (error) {
+      set({ searchedUser: null });
       const errorMessage =
-        error.response.data.message || "Network error. Please try again later.";
+        error.response?.data?.message || "User not found.";
       toast.error(errorMessage);
     } finally {
       set({ isUsersLoading: false });
@@ -92,5 +94,25 @@ export const useChatStore = create((set, get) => ({
         error.response.data.message || "Network error. Please try again later.";
       toast.error(errorMessage);
     }
+  },
+
+  subscribeToMessages: () => {
+    const { selectedUser } = get();
+    if (!selectedUser) return;
+
+    const socket = useAuthStore.getState().socket;
+    if (!socket) return;
+
+    socket.on("newMessage", (newMessage) => {
+      if (newMessage.senderId !== get().selectedUser?._id) return;
+      set({ messages: [...get().messages, newMessage] });
+    });
+  },
+
+  unsubscribeFromMessages: () => {
+    const socket = useAuthStore.getState().socket;
+    if (!socket) return;
+    
+    socket.off("newMessage");
   },
 }));

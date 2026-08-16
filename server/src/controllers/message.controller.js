@@ -1,17 +1,24 @@
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import cloudinary from "../lib/cloudinary.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
-export const getAllContact = async (req, res) => {
+export const getUser = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
-    const allUsers = await User.find({ _id: { $ne: loggedInUserId } }).select(
-      "-password",
-    );
+    const searchEmail = req.params.email;
+    const getUser = await User.findOne({
+      email: searchEmail,
+      _id: { $ne: loggedInUserId },
+    }).select("-password");
 
-    return res.status(200).json(allUsers);
+    if (!getUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json(getUser);
   } catch (error) {
-    console.log("Error in getAllContact controller:", error.message);
+    console.log("Error in getUser controller:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -56,6 +63,12 @@ export const sendMessage = async (req, res) => {
       text,
       image: imageUrl,
     }).save();
+
+    // realtime functionality
+    const receiverSocketId = getReceiverSocketId(userId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
 
     return res.status(201).json(newMessage);
   } catch (error) {

@@ -5,7 +5,7 @@ const ActiveTabSwitch = () => {
   return (
     <div className="px-6 py-4">
       <div className="flex gap-2 p-1 bg-slate-800/50 rounded-xl">
-        {["chats", "contacts"].map((tab) => (
+        {["chats", "search"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
