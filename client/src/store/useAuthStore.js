@@ -7,6 +7,7 @@ export const useAuthStore = create((set) => ({
   isCheckingAuth: true,
   isSigningUp: false,
   isLoggingIn: false,
+  isUpdatingProfile: false,
 
   checkAuth: async () => {
     try {
@@ -64,6 +65,23 @@ export const useAuthStore = create((set) => ({
       const errorMessage =
         error.response.data.message || "Network error. Please try again later.";
       toast.error(errorMessage);
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({
+      isUpdatingProfile: true,
+    });
+    try {
+      const res = await api.put("/auth/update-profile", data);
+      set({ authUser: res.data });
+      toast.success("Updated Profile Successfully!");
+    } catch (error) {
+      const errorMessage =
+        error.response.data.message || "Network error. Please try again later.";
+      toast.error(errorMessage);
+    } finally {
+      set({ isUpdatingProfile: false });
     }
   },
 }));
