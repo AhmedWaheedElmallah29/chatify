@@ -4,9 +4,10 @@ import ChatList from "../components/ChatList";
 import ContactList from "../components/ContactList";
 import ChatContainer from "../components/ChatContainer";
 import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
+import { useChatStore } from "../store/useChatStore";
 
 const Chat = () => {
-  const isChatsTabActive = true;
+  const { activeTab } = useChatStore();
   const isConversationSelected = false;
 
   return (
@@ -22,7 +23,7 @@ const Chat = () => {
           <ProfileHeader />
           <ActiveTabSwitch />
 
-          {isChatsTabActive ? <ChatList /> : <ContactList />}
+          {activeTab === "chats" ? <ChatList /> : <ContactList />}
         </div>
 
         <div

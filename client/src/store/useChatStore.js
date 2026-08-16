@@ -41,7 +41,7 @@ export const useChatStore = create((set, get) => ({
 
     try {
       const res = await api.get("/message/chats");
-      set({ allContacts: res.data });
+      set({ chats: res.data });
     } catch (error) {
       const errorMessage =
         error.response.data.message || "Network error. Please try again later.";
