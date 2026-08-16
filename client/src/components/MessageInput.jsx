@@ -8,7 +8,15 @@ const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState();
   const fileInputRef = useRef();
 
-  const { sendMessage } = useChatStore();
+  const { sendMessage, isSoundEnabled } = useChatStore();
+
+  const playKeystroke = () => {
+    if (!isSoundEnabled) return;
+    const randomNum = Math.floor(Math.random() * 4) + 1;
+    const audio = new Audio(`/sounds/keystroke${randomNum}.mp3`);
+    audio.volume = 1.0;
+    audio.play().catch((err) => console.log("Audio play failed:", err));
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -85,7 +93,12 @@ const MessageInput = () => {
           className="bg-transparent flex-1 text-sm text-slate-200 outline-none placeholder:text-slate-400 ml-2 py-1"
           placeholder="Type a message..."
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            if (e.target.value.length > text.length) {
+              playKeystroke();
+            }
+          }}
         />
         
         <button

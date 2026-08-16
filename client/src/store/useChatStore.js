@@ -117,8 +117,14 @@ export const useChatStore = create((set, get) => ({
     socket.off("newMessage");
 
     socket.on("newMessage", (newMessage) => {
-      const { selectedUser } = get();
+      const { selectedUser, isSoundEnabled } = get();
       
+      if (isSoundEnabled) {
+        const audio = new Audio("/sounds/notification.mp3");
+        audio.volume = 1.0;
+        audio.play().catch((err) => console.log("Audio play failed:", err));
+      }
+
       if (newMessage.senderId !== selectedUser?._id) {
         set((state) => ({
           unreadCounts: {
