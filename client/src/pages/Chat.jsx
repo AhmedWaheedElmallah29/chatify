@@ -7,8 +7,7 @@ import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
 import { useChatStore } from "../store/useChatStore";
 
 const Chat = () => {
-  const { activeTab } = useChatStore();
-  const isConversationSelected = false;
+  const { activeTab, selectedUser } = useChatStore();
 
   return (
     <div className="h-screen w-full bg-[#111827] flex items-center justify-center p-0 md:p-4 font-sans relative overflow-hidden">
@@ -17,7 +16,7 @@ const Chat = () => {
       <div className="w-full h-full md:max-w-[1100px] md:h-[85vh] md:min-h-[600px] bg-[#1a2130] md:rounded-2xl flex overflow-hidden md:shadow-2xl z-10 md:border border-slate-700/30">
         <div
           className={`w-full md:w-80 bg-[#1e2638] flex-col border-r border-slate-700/50 relative z-20 ${
-            isConversationSelected ? "hidden md:flex" : "flex"
+            selectedUser ? "hidden md:flex" : "flex"
           }`}
         >
           <ProfileHeader />
@@ -28,14 +27,10 @@ const Chat = () => {
 
         <div
           className={`flex-1 w-full ${
-            !isConversationSelected ? "hidden md:flex" : "flex"
+            !selectedUser ? "hidden md:flex" : "flex"
           }`}
         >
-          {isConversationSelected ? (
-            <ChatContainer />
-          ) : (
-            <NoConversationPlaceholder />
-          )}
+          {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
         </div>
       </div>
     </div>

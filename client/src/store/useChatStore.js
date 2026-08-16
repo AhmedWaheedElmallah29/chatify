@@ -50,4 +50,32 @@ export const useChatStore = create((set, get) => ({
       set({ isUsersLoading: false });
     }
   },
+
+  getMessagesByUserId: async (userId) => {
+    set({ isMessagedLoading: true });
+    try {
+      const res = await api.get(`/message/${userId}`);
+      set({ messages: res.data });
+    } catch (error) {
+      const errorMessage =
+        error.response.data.message || "Network error. Please try again later.";
+      toast.error(errorMessage);
+    } finally {
+      set({ isMessagedLoading: false });
+    }
+  },
+
+  sendMessage: async (userId) => {
+    set({ isMessagedLoading: true });
+    try {
+      const res = await api.post(`/message/${userId}`);
+      set({ messages: res.data });
+    } catch (error) {
+      const errorMessage =
+        error.response.data.message || "Network error. Please try again later.";
+      toast.error(errorMessage);
+    } finally {
+      set({ isMessagedLoading: false });
+    }
+  },
 }));
