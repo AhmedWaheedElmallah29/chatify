@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import api from "../utils/api";
 import toast from "react-hot-toast";
+import { useAuthStore } from "./useAuthStore";
 
 export const useChatStore = create((set, get) => ({
   allContacts: [],
@@ -65,17 +66,31 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  sendMessage: async (userId) => {
-    set({ isMessagedLoading: true });
+  sendMessage: async (messageData) => {
+    const { selectedUser, messages } = get();
+    const { authUser } = useAuthStore.getState();
+
+    const tempId = `temp-${Date.now()}`;
+
+    const optimisticMessage = {
+      _id: tempId,
+      senderId: authUser._id,
+      receiverId: selectedUser._id,
+      text: messageData.text,
+      image: messageData.image,
+      createdAt: new Date().toISOString(),
+      isOptimistic: true, // flag to identify optimistic messages (optional)
+    };
+    // immidetaly update the ui by adding the message
+    set({ messages: [...messages, optimisticMessage] });
     try {
-      const res = await api.post(`/message/${userId}`);
-      set({ messages: res.data });
+      const res = await api.post(`/message/${selectedUser._id}`, messageData);
+      set({ messages: messages.concat(res.data) });
     } catch (error) {
+      set({ messages: messages });
       const errorMessage =
         error.response.data.message || "Network error. Please try again later.";
       toast.error(errorMessage);
-    } finally {
-      set({ isMessagedLoading: false });
     }
   },
 }));
