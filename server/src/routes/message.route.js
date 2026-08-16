@@ -7,6 +7,7 @@ import {
   sendMessage,
   getChatPartners,
   getUser,
+  getUnreadCounts,
 } from "../controllers/message.controller.js";
 
 const router = express.Router();
@@ -15,6 +16,7 @@ router.use(protectRoute, arcjetProtection);
 
 router.get("/contacts/:email", getUser);
 router.get("/chats", getChatPartners);
+router.get("/unread", getUnreadCounts);
 router.route("/:id").get(getMessages).post(sendMessage);
 
 export default router;

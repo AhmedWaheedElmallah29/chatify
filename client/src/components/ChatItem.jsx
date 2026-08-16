@@ -8,6 +8,8 @@ const ChatItem = ({ chat }) => {
   const isActive = selectedUser?._id === chat._id;
   const isOnline = onlineUsers?.includes(chat._id);
 
+  const unreadCount = useChatStore((state) => state.unreadCounts[chat._id]) || 0;
+
   return (
     <div
       onClick={() => setSelectedUser(chat)}
@@ -27,17 +29,24 @@ const ChatItem = ({ chat }) => {
           <span className="absolute bottom-0 right-0 w-3 h-3 bg-teal-500 border-2 border-[#1e2638] rounded-full"></span>
         )}
       </div>
-      <div className="flex-1">
-        <h3
-          className={`text-sm font-medium ${
-            isActive ? "text-slate-200" : "text-slate-300"
-          }`}
-        >
-          {chat.fullName}
-        </h3>
-        <p className={`text-xs mt-0.5 ${isOnline ? (isActive ? "text-teal-400" : "text-teal-500/80") : "text-slate-500"}`}>
-          {isOnline ? "Online" : "Offline"}
-        </p>
+      <div className="flex-1 flex justify-between items-center">
+        <div>
+          <h3
+            className={`text-sm font-medium ${
+              isActive ? "text-slate-200" : "text-slate-300"
+            }`}
+          >
+            {chat.fullName}
+          </h3>
+          <p className={`text-xs mt-0.5 ${isOnline ? (isActive ? "text-teal-400" : "text-teal-500/80") : "text-slate-500"}`}>
+            {isOnline ? "Online" : "Offline"}
+          </p>
+        </div>
+        {unreadCount > 0 && (
+          <div className="bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex justify-center items-center rounded-full">
+            {unreadCount}
+          </div>
+        )}
       </div>
     </div>
   );

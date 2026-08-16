@@ -25,7 +25,6 @@ const formatMessageDate = (dateString) => {
   }
 };
 
-
 const ChatContainer = () => {
   const { selectedUser, messages, getMessagesByUserId, isMessagedLoading } =
     useChatStore();
@@ -34,11 +33,6 @@ const ChatContainer = () => {
 
   useEffect(() => {
     getMessagesByUserId(selectedUser?._id);
-    
-    const { subscribeToMessages, unsubscribeFromMessages } = useChatStore.getState();
-    subscribeToMessages();
-
-    return () => unsubscribeFromMessages();
   }, [getMessagesByUserId, selectedUser]);
 
   useEffect(() => {
@@ -56,12 +50,14 @@ const ChatContainer = () => {
           <div className="flex flex-col gap-4">
             {messages.map((msg, index) => {
               const isMine = msg.senderId === authUser._id;
-              
+
               let showDateDivider = false;
               if (index === 0) {
                 showDateDivider = true;
               } else {
-                const prevDate = new Date(messages[index - 1].createdAt).toDateString();
+                const prevDate = new Date(
+                  messages[index - 1].createdAt,
+                ).toDateString();
                 const currDate = new Date(msg.createdAt).toDateString();
                 if (prevDate !== currDate) {
                   showDateDivider = true;
@@ -82,60 +78,57 @@ const ChatContainer = () => {
                       isMine ? "justify-end" : "justify-start"
                     }`}
                   >
-                  {!isMine && (
-                    <div className="w-8 h-8 rounded-full bg-slate-600 flex-shrink-0 mt-auto overflow-hidden border border-slate-700/50">
-                      <img
-                        src={selectedUser?.profilePic || "avatar.png"}
-                        alt={selectedUser?.fullName}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
+                    {!isMine && (
+                      <div className="w-8 h-8 rounded-full bg-slate-600 flex-shrink-0 mt-auto overflow-hidden border border-slate-700/50">
+                        <img
+                          src={selectedUser?.profilePic || "avatar.png"}
+                          alt={selectedUser?.fullName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
 
-                  <div
-                    className={`flex flex-col max-w-[80%] sm:max-w-[70%] ${
-                      isMine ? "items-end" : "items-start"
-                    }`}
-                  >
                     <div
-                      className={`relative flex flex-col p-3 shadow-md ${
-                        isMine
-                          ? "bg-teal-600 text-white rounded-2xl rounded-br-sm"
-                          : "bg-[#1e2638] text-slate-200 rounded-2xl rounded-bl-sm border border-slate-700/50"
+                      className={`flex flex-col max-w-[80%] sm:max-w-[70%] ${
+                        isMine ? "items-end" : "items-start"
                       }`}
                     >
-                      {msg.image && (
-                        <img
-                          src={msg.image}
-                          alt="Attachment"
-                          className="rounded-xl w-full max-w-[260px] h-auto object-cover mb-1.5"
-                        />
-                      )}
-
-                      {msg.text && (
-                        <p className="text-[15px] leading-relaxed break-words whitespace-pre-wrap">
-                          {msg.text}
-                        </p>
-                      )}
-
-                      <span
-                        className={`text-[10px] font-medium mt-1 text-right ${
-                          isMine ? "text-teal-100/70" : "text-slate-400/80"
+                      <div
+                        className={`relative flex flex-col p-3 shadow-md ${
+                          isMine
+                            ? "bg-teal-600 text-white rounded-2xl rounded-br-sm"
+                            : "bg-[#1e2638] text-slate-200 rounded-2xl rounded-bl-sm border border-slate-700/50"
                         }`}
                       >
-                        {msg.createdAt
-                          ? new Date(msg.createdAt).toLocaleTimeString(
-                              [],
-                              {
+                        {msg.image && (
+                          <img
+                            src={msg.image}
+                            alt="Attachment"
+                            className="rounded-xl w-full max-w-[260px] h-auto object-cover mb-1.5"
+                          />
+                        )}
+
+                        {msg.text && (
+                          <p className="text-[15px] leading-relaxed break-words whitespace-pre-wrap">
+                            {msg.text}
+                          </p>
+                        )}
+
+                        <span
+                          className={`text-[10px] font-medium mt-1 text-right ${
+                            isMine ? "text-teal-100/70" : "text-slate-400/80"
+                          }`}
+                        >
+                          {msg.createdAt
+                            ? new Date(msg.createdAt).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }
-                            )
-                          : ""}
-                      </span>
+                              })
+                            : ""}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
                 </Fragment>
               );
             })}

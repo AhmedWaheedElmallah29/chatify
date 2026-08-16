@@ -17,6 +17,10 @@ const messageSchema = new Schema(
       type: String,
     },
     image: String,
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

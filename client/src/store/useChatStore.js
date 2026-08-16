@@ -6,6 +6,7 @@ import { useAuthStore } from "./useAuthStore";
 export const useChatStore = create((set, get) => ({
   chats: [],
   messages: [],
+  unreadCounts: {},
   activeTab: "chats",
   selectedUser: null,
   isUsersLoading: false,
@@ -54,11 +55,23 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  getUnreadCounts: async () => {
+    try {
+      const res = await api.get("/message/unread");
+      set({ unreadCounts: res.data });
+    } catch (error) {
+      console.error("Failed to fetch unread counts", error);
+    }
+  },
+
   getMessagesByUserId: async (userId) => {
     set({ isMessagedLoading: true });
     try {
       const res = await api.get(`/message/${userId}`);
-      set({ messages: res.data });
+      set((state) => ({ 
+        messages: res.data,
+        unreadCounts: { ...state.unreadCounts, [userId]: 0 }
+      }));
     } catch (error) {
       const errorMessage =
         error.response.data.message || "Network error. Please try again later.";
@@ -97,14 +110,24 @@ export const useChatStore = create((set, get) => ({
   },
 
   subscribeToMessages: () => {
-    const { selectedUser } = get();
-    if (!selectedUser) return;
-
     const socket = useAuthStore.getState().socket;
     if (!socket) return;
 
+    // Prevent duplicate listeners
+    socket.off("newMessage");
+
     socket.on("newMessage", (newMessage) => {
-      if (newMessage.senderId !== get().selectedUser?._id) return;
+      const { selectedUser } = get();
+      
+      if (newMessage.senderId !== selectedUser?._id) {
+        set((state) => ({
+          unreadCounts: {
+            ...state.unreadCounts,
+            [newMessage.senderId]: (state.unreadCounts[newMessage.senderId] || 0) + 1,
+          },
+        }));
+        return;
+      }
       set({ messages: [...get().messages, newMessage] });
     });
   },

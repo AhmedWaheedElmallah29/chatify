@@ -5,11 +5,12 @@ import NoChatsFound from "./NoChatsFound";
 import ChatItem from "./ChatItem";
 
 const ChatList = () => {
-  const { getMyChatPartners, chats, isUsersLoading } = useChatStore();
+  const { getMyChatPartners, getUnreadCounts, chats, isUsersLoading } = useChatStore();
 
   useEffect(() => {
     getMyChatPartners();
-  }, [getMyChatPartners]);
+    getUnreadCounts();
+  }, [getMyChatPartners, getUnreadCounts]);
 
   if (isUsersLoading) return <UsersLoadingSkeleton />;
   if (chats.length === 0) return <NoChatsFound />;

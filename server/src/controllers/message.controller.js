@@ -27,6 +27,12 @@ export const getMessages = async (req, res) => {
   try {
     const myId = req.user._id;
     const userId = req.params.id;
+
+    // Mark messages from this user as read
+    await Message.updateMany(
+      { senderId: userId, receiverId: myId, isRead: false },
+      { $set: { isRead: true } }
+    );
     const allMessages = await Message.find({
       $or: [
         { senderId: myId, receiverId: userId },
@@ -101,6 +107,27 @@ export const getChatPartners = async (req, res) => {
     return res.status(200).json(chatPartners);
   } catch (error) {
     console.log("Error in getChatPartners controller:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getUnreadCounts = async (req, res) => {
+  try {
+    const myId = req.user._id;
+    
+    const unreadMessages = await Message.aggregate([
+      { $match: { receiverId: myId, isRead: false } },
+      { $group: { _id: "$senderId", count: { $sum: 1 } } },
+    ]);
+    
+    const unreadCounts = {};
+    unreadMessages.forEach((item) => {
+      unreadCounts[item._id] = item.count;
+    });
+    
+    return res.status(200).json(unreadCounts);
+  } catch (error) {
+    console.log("Error in getUnreadCounts controller:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

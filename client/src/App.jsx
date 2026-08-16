@@ -2,6 +2,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import { useAuthStore } from "./store/useAuthStore";
+import { useChatStore } from "./store/useChatStore";
 import Chat from "./pages/Chat";
 import { useEffect } from "react";
 import PageLoader from "./components/PageLoader";
@@ -21,6 +22,7 @@ const GuestRoute = () => {
 
 const App = () => {
   const { checkAuth, isCheckingAuth, authUser, connectSocket, disconnectSocket } = useAuthStore();
+  const { subscribeToMessages, unsubscribeFromMessages } = useChatStore();
 
   useEffect(() => {
     checkAuth();
@@ -29,10 +31,12 @@ const App = () => {
   useEffect(() => {
     if (authUser) {
       connectSocket();
+      subscribeToMessages();
     } else {
       disconnectSocket();
+      unsubscribeFromMessages();
     }
-  }, [authUser, connectSocket, disconnectSocket]);
+  }, [authUser, connectSocket, disconnectSocket, subscribeToMessages, unsubscribeFromMessages]);
 
   if (isCheckingAuth) return <PageLoader />;
 
